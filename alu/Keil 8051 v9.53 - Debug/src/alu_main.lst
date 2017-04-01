@@ -1,0 +1,309 @@
+C51 COMPILER V9.53.0.0   ALU_MAIN                                                          03/31/2017 20:41:11 PAGE 1   
+
+
+C51 COMPILER V9.53.0.0, COMPILATION OF MODULE ALU_MAIN
+OBJECT MODULE PLACED IN .\src\alu_main.OBJ
+COMPILER INVOKED BY: c:\SiliconLabs\SimplicityStudio\v4\developer\toolchains\keil_8051\9.53\BIN\C51.exe C:\Users\Student
+                    -\SimplicityStudio\v4_workspace\alu\src\alu_main.c OMF2 SMALL DEBUG OBJECTEXTEND ROM(LARGE) WARNINGLEVEL(2) FLOATFUZZY(3)
+                    - OPTIMIZE(8,SPEED) DEFINE(DEBUG=1) INTVECTOR(0X0000) INTPROMOTE INCDIR(C:/Users/Student/SimplicityStudio/v4_workspace/al
+                    -u/inc;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//Device/shared/si8051base;C:/SiliconLabs/SimplicityS
+                    -tudio/v4/developer/sdks/8051/v4.0.3//Device/EFM8BB3/inc) PRINT(.\src\alu_main.lst) COND PAGEWIDTH(120) PAGELENGTH(65) OB
+                    -JECT(.\src\alu_main.OBJ)
+
+line level    source
+
+   1          //-----------------------------------------------------------------------------
+   2          // Includes
+   3          //-----------------------------------------------------------------------------
+   4          #include <SI_EFM8BB3_Register_Enums.h>                  // SFR declarations
+   5          #include "InitDevice.h"
+   6          // $[Generated Includes]
+   7          // [Generated Includes]$
+   8          //-----------------------------------------------------------------------------
+   9          // NoDipZone - Daniel Park, Christopher E
+  10          // ----------------------------------------------------------------------------
+  11          // No more mechanical DIP switches in the ALU circuit.
+  12          // Sets input value and desired operation using pushbuttons on the EFM8 Busy Bee
+  13          //-----------------------------------------------------------------------------
+  14          // PB1 (Left button) Increments
+  15          // PB0 (Right button) Selects
+  16          //
+  17          // Number output:
+  18          // P0_B4        MSB
+  19          // P0_B5
+  20          // P0_B6
+  21          // P0_B7        LSB
+  22          //
+  23          // Operation output:
+  24          // P1_B0        MSB
+  25          // P1_B1        LSB
+  26          //
+  27          // P1_B0        P1_B1   Operation
+  28          // 0            0               Add
+  29          // 0            1               Zeros/Ones
+  30          // 1            0               And
+  31          // 1            1               Or
+  32          //-----------------------------------------------------------------------------
+  33          // main() Routine
+  34          // ----------------------------------------------------------------------------
+  35          
+  36          void Delay();
+  37          
+  38          int main(void) {
+  39   1              // Call hardware initialization routine
+  40   1              enter_DefaultMode_from_RESET();
+  41   1              XBR2 |= 0x40;                                   //enables output to pins
+  42   1      
+  43   1              P0_B4 = 0;
+  44   1              P0_B5 = 0;
+  45   1              P0_B6 = 0;
+  46   1              P0_B7 = 0;
+  47   1              P1_B0 = 0;
+  48   1              P1_B1 = 0;
+  49   1              P1_B2 = 0;
+  50   1      
+  51   1              while (1) {
+C51 COMPILER V9.53.0.0   ALU_MAIN                                                          03/31/2017 20:41:11 PAGE 2   
+
+  52   2                      int stage = 0;
+  53   2                      int number = 0;
+  54   2                      int operation = 0;
+  55   2                      int i;
+  56   2      
+  57   2                      while (stage == 0) {                    //selecting number
+  58   3                              //P1_B4 = 0; //g
+  59   3                              //P1_B5 = 0; //b
+  60   3                              P1_B6 = 0; //r
+  61   3                              if (P0_B3 == 0) {               //pushbutton 1, increments number
+  62   4                                      number++;
+  63   4                                      if (number > 15) {
+  64   5                                              number = 0;
+  65   5                                      }
+  66   4                              } else if (P0_B2 == 0) {        //pushbutton 0, sets number
+  67   4                                      stage++;
+  68   4                              }
+  69   3                      }
+  70   2      
+  71   2                      Delay();
+  72   2                      Delay();
+  73   2      
+  74   2                      while (stage == 1) {                    //converts number to binary
+  75   3                              switch (number) {
+  76   4                              case 0:
+  77   4                                      P0_B4 = 0;              //MSB
+  78   4                                      P0_B5 = 0;
+  79   4                                      P0_B6 = 0;
+  80   4                                      P0_B7 = 0;              //LSB
+  81   4                                      stage++;
+  82   4                                      break;
+  83   4                              case 1:
+  84   4                                      P0_B4 = 0;
+  85   4                                      P0_B5 = 0;
+  86   4                                      P0_B6 = 0;
+  87   4                                      P0_B7 = 1;
+  88   4                                      stage++;
+  89   4                                      break;
+  90   4                              case 2:
+  91   4                                      P0_B4 = 0;
+  92   4                                      P0_B5 = 0;
+  93   4                                      P0_B6 = 1;
+  94   4                                      P0_B7 = 0;
+  95   4                                      stage++;
+  96   4                                      break;
+  97   4                              case 3:
+  98   4                                      P0_B4 = 0;
+  99   4                                      P0_B5 = 0;
+ 100   4                                      P0_B6 = 1;
+ 101   4                                      P0_B7 = 1;
+ 102   4                                      stage++;
+ 103   4                                      break;
+ 104   4                              case 4:
+ 105   4                                      P0_B4 = 0;
+ 106   4                                      P0_B5 = 1;
+ 107   4                                      P0_B6 = 0;
+ 108   4                                      P0_B7 = 0;
+ 109   4                                      stage++;
+ 110   4                                      break;
+ 111   4                              case 5:
+ 112   4                                      P0_B4 = 0;
+ 113   4                                      P0_B5 = 1;
+ 114   4                                      P0_B6 = 0;
+C51 COMPILER V9.53.0.0   ALU_MAIN                                                          03/31/2017 20:41:11 PAGE 3   
+
+ 115   4                                      P0_B7 = 1;
+ 116   4                                      stage++;
+ 117   4                                      break;
+ 118   4                              case 6:
+ 119   4                                      P0_B4 = 0;
+ 120   4                                      P0_B5 = 1;
+ 121   4                                      P0_B6 = 1;
+ 122   4                                      P0_B7 = 0;
+ 123   4                                      stage++;
+ 124   4                                      break;
+ 125   4                              case 7:
+ 126   4                                      P0_B4 = 0;
+ 127   4                                      P0_B5 = 1;
+ 128   4                                      P0_B6 = 1;
+ 129   4                                      P0_B7 = 1;
+ 130   4                                      stage++;
+ 131   4                                      break;
+ 132   4                              case 8:
+ 133   4                                      P0_B4 = 1;
+ 134   4                                      P0_B5 = 0;
+ 135   4                                      P0_B6 = 0;
+ 136   4                                      P0_B7 = 0;
+ 137   4                                      stage++;
+ 138   4                                      break;
+ 139   4                              case 9:
+ 140   4                                      P0_B4 = 1;
+ 141   4                                      P0_B5 = 0;
+ 142   4                                      P0_B6 = 0;
+ 143   4                                      P0_B7 = 1;
+ 144   4                                      stage++;
+ 145   4                                      break;
+ 146   4                              case 10:
+ 147   4                                      P0_B4 = 1;
+ 148   4                                      P0_B5 = 0;
+ 149   4                                      P0_B6 = 1;
+ 150   4                                      P0_B7 = 0;
+ 151   4                                      stage++;
+ 152   4                                      break;
+ 153   4                              case 11:
+ 154   4                                      P0_B4 = 1;
+ 155   4                                      P0_B5 = 0;
+ 156   4                                      P0_B6 = 1;
+ 157   4                                      P0_B7 = 1;
+ 158   4                                      stage++;
+ 159   4                                      break;
+ 160   4                              case 12:
+ 161   4                                      P0_B4 = 1;
+ 162   4                                      P0_B5 = 1;
+ 163   4                                      P0_B6 = 0;
+ 164   4                                      P0_B7 = 0;
+ 165   4                                      stage++;
+ 166   4                                      break;
+ 167   4                              case 13:
+ 168   4                                      P0_B4 = 1;
+ 169   4                                      P0_B5 = 1;
+ 170   4                                      P0_B6 = 0;
+ 171   4                                      P0_B7 = 1;
+ 172   4                                      stage++;
+ 173   4                                      break;
+ 174   4                              case 14:
+ 175   4                                      P0_B4 = 1;
+ 176   4                                      P0_B5 = 1;
+ 177   4                                      P0_B6 = 1;
+C51 COMPILER V9.53.0.0   ALU_MAIN                                                          03/31/2017 20:41:11 PAGE 4   
+
+ 178   4                                      P0_B7 = 0;
+ 179   4                                      stage++;
+ 180   4                                      break;
+ 181   4                              case 15:
+ 182   4                                      P0_B4 = 1;
+ 183   4                                      P0_B5 = 1;
+ 184   4                                      P0_B6 = 1;
+ 185   4                                      P0_B7 = 1;
+ 186   4                                      stage++;
+ 187   4                                      break;
+ 188   4                              }
+ 189   3                      }
+ 190   2      
+ 191   2                      Delay();
+ 192   2                      Delay();
+ 193   2      
+ 194   2                      while (stage == 2) {                    //selecting operation
+ 195   3                              P1_B5 = 0; //b
+ 196   3                              P1_B6 = 1; //r
+ 197   3                              if (P0_B3 == 0) {
+ 198   4                                      operation++;
+ 199   4                                      if (operation > 3) {
+ 200   5                                              operation = 0;
+ 201   5                                      }
+ 202   4                              }
+ 203   3                              if (P0_B2 == 0) {
+ 204   4                                      stage++;
+ 205   4                              }
+ 206   3                      }
+ 207   2      
+ 208   2                      Delay();
+ 209   2                      Delay();
+ 210   2      
+ 211   2                      while (stage == 3) {                            //converts operation to binary
+ 212   3                              switch (operation) {
+ 213   4                              case 0:
+ 214   4                                      P1_B0 = 0;      //MSB
+ 215   4                                      P1_B1 = 0;      //LSB
+ 216   4                                      stage++;
+ 217   4                                      break;
+ 218   4                              case 1:
+ 219   4                                      P1_B0 = 0;
+ 220   4                                      P1_B1 = 1;
+ 221   4                                      stage++;
+ 222   4                                      break;
+ 223   4                              case 2:
+ 224   4                                      P1_B0 = 1;
+ 225   4                                      P1_B1 = 0;
+ 226   4                                      stage++;
+ 227   4                                      break;
+ 228   4                              case 3:
+ 229   4                                      P1_B0 = 1;
+ 230   4                                      P1_B1 = 1;
+ 231   4                                      stage++;
+ 232   4                                      break;
+ 233   4                              }
+ 234   3                      }
+ 235   2      
+ 236   2                      Delay();
+ 237   2                      Delay();
+ 238   2      
+ 239   2                      while (stage == 4) {
+ 240   3                              P1_B4 = 0; //g
+C51 COMPILER V9.53.0.0   ALU_MAIN                                                          03/31/2017 20:41:11 PAGE 5   
+
+ 241   3                              P1_B5 = 1; //b
+ 242   3                              //      P1_B6 = 0; //r
+ 243   3                              if (P0_B3 == 0) {
+ 244   4                                      P1_B2 = 1;
+ 245   4                                      for (i = 0; i < 10000; i++) {
+ 246   5                                      }
+ 247   4                                      P1_B2 = 0;
+ 248   4                              }
+ 249   3                      }
+ 250   2      
+ 251   2                      Delay();
+ 252   2                      Delay();
+ 253   2      
+ 254   2                      while (stage == 5) {
+ 255   3                              if (P0_B2 == 0 && P0_B3 == 0) {
+ 256   4                                      stage++;
+ 257   4                              }
+ 258   3                      }
+ 259   2              } //run forever
+ 260   1      }
+ 261          
+ 262          void Delay() {
+ 263   1              int x;
+ 264   1              for (x = 0; x < 20000; x++) {
+ 265   2              }
+ 266   1      }
+ 267          // $[Generated Run-time code]
+ 268          // [Generated Run-time code]$
+ 269          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    710    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       8
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
